@@ -198,6 +198,65 @@
         </div>
     </div>
 
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-XQoYMqMTK8LpLe+gC1G19xJwQbK/pyYv+0W33dVT/l0="
+    crossorigin=""
+  />
+  <style>
+    /* Karte auf volle Breite, fixe Höhe: */
+    #map { width: 100%; height: 300px; border-radius: 12px; margin-bottom: 2rem; }
+  </style>
+</head>
+<body class="p-4 md:p-8">
+  <h1 id="main-title" class="text-3xl md:text-4xl font-bold text-center mb-6">
+    Ablaufplan JGA Jan
+  </h1>
+
+  <!-- Hier kommt die Karte -->
+  <div id="map"></div>
+
+  <!-- Dein Countdown und Timeline … -->
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-j3wnW+YpE3o8wDjaXyrZ2eOfT2xv5tZk3kP+TCOFQmY="
+    crossorigin=""
+  ></script>
+  <script>
+    // Koordinaten deiner Events:
+    const locations = [
+      { title: 'Jan abholen (Lüneburg Hbf)', coords: [53.2460, 10.4147] },
+      { title: 'Hamburg Hbf', coords: [53.5526, 9.9937] },
+      { title: 'Brunch (Zentrum)', coords: [53.5511, 9.9937] },
+      { title: 'JUMP House', coords: [53.6532, 9.9310] },
+      { title: 'Rathaus', coords: [53.5511, 9.9937] },
+      { title: 'Escape Room', coords: [53.5531, 9.9878] },
+      { title: 'BLOCK HOUSE', coords: [53.5510, 9.9953] },
+      { title: 'Reeperbahn', coords: [53.5503, 9.9599] },
+      { title: 'NOHO Club', coords: [53.5538, 9.9635] }
+    ];
+
+    // Karte initialisieren, zentriert auf Hamburg
+    const map = L.map('map').setView([53.5511, 9.9937], 12);
+
+    // OpenStreetMap-Layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>-Mitwirkende'
+    }).addTo(map);
+
+    // Marker und Popups hinzufügen
+    locations.forEach(loc => {
+      L.marker(loc.coords)
+        .addTo(map)
+        .bindPopup(`<strong>${loc.title}</strong>`);
+    });
+  </script>
+    
     <script>
         const eventDate = new Date('2025-06-12T00:00:00'); 
 
