@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Junggesellenabschied Jan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            color: #1a202c;
+        }
+        .event-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-left-color 0.3s ease;
+            position: relative; 
+            z-index: 1;  
+            padding-left: 1.5rem; 
+            border-left-width: 6px; 
+            border-left-style: solid;
+            border-left-color: #60a5fa; 
+        }
+        .event-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .active-card {
+            background-color: #ef4444; 
+            color: white;
+            z-index: 2; 
+            border-left-color: #fca5a5; 
+        }
+        .active-card .text-gray-700, .active-card .text-gray-500, .active-card .text-gray-600 {
+            color: #f9fafb;
+        }
+        .active-card .btn-map, .active-card .btn-ticket {
+            background-color: #ffffff;
+            color: #ef4444;
+            border: 1px solid #ef4444;
+        }
+        .active-card .btn-map:hover, .active-card .btn-ticket:hover {
+             background-color: #fee2e2;
+        }
+        .details-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out, padding 0.5s ease-out;
+            background-color: #f9fafb;
+        }
+        .details-section.open {
+            max-height: 500px;
+            padding-top: 0.75rem;
+            padding-bottom: 0.75rem;
+        }
+        .active-card .details-section {
+            background-color: #fee2e2;
+            color: #7f1d1d;
+        }
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            cursor: pointer;
+        }
+        .btn-map {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-map:hover {
+            background-color: #2563eb;
+        }
+        .btn-ticket {
+            background-color: #10b981;
+            color: white;
+        }
+        .btn-ticket:hover {
+            background-color: #059669;
+        }
+        #main-title {
+            color: #1a202c; 
+            text-align: center;
+            margin-bottom: 1.5rem; 
+        }
+        #countdown-container {
+            background-color: #2d3748;
+            color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+
+        #progress-bar-column {
+            padding-right: 10px; 
+            position: sticky; 
+            top: 1rem; 
+            align-self: flex-start;
+            z-index: 20; 
+        }
+
+        #progress-bar-track {
+            width: 8px;
+            background-color: #cbd5e1;
+            position: relative;
+            border-radius: 4px;
+        }
+        #progress-bar-filled {
+            width: 100%;
+            background-color: #ef4444;
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-radius: 4px;
+            transition: height 0.5s linear;
+        }
+        .progress-dot {
+            width: 16px;
+            height: 16px;
+            background-color: white;
+            border: 3px solid #cbd5e1;
+            border-radius: 50%;
+            position: absolute;
+            left: -4px; 
+            transform: translateY(-50%);
+            z-index: 25; 
+            transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+        }
+        .progress-dot.active-dot {
+            background-color: #ef4444;
+            border-color: #ffffff;
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        #qr-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); display: flex;
+            justify-content: center; align-items: center; z-index: 1000;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        #qr-modal.open { opacity: 1; visibility: visible; }
+        #qr-modal-content {
+            background-color: white; padding: 20px; border-radius: 10px;
+            position: relative; width: 90%; height: 90%;
+            display: flex; justify-content: center; align-items: center;
+        }
+        #qr-modal-content img { max-width: 100%; max-height: 100%; object-fit: contain; }
+        #qr-modal-close {
+            position: absolute; top: 10px; right: 15px; font-size: 2rem;
+            font-weight: bold; color: #333; cursor: pointer; line-height: 1;
+        }
+        #qr-modal-close:hover { color: #ef4444; }
+
+        .event-time-highlight {
+            background-color: #e0e7ff; 
+            color: #4338ca; 
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-weight: 600;
+            display: inline-block; 
+        }
+        .active-card .event-time-highlight {
+            background-color: #fee2e2; 
+            color: #b91c1c; 
+        }
+        /* .event-title-icon CSS entfernt */
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    
+    <h1 id="main-title" class="text-3xl md:text-4xl font-bold">Junggesellenabschied Jan</h1>
+
+    <div id="countdown-container" class="text-2xl md:text-3xl font-bold max-w-4xl mx-auto">
+        Noch <span id="countdown"></span> bis zum Start!
+    </div>
+
+    <div class="flex w-full max-w-4xl mx-auto">
+        <div id="progress-bar-column" class="mr-6 md:mr-10 flex-shrink-0"> 
+             <div id="progress-bar-track" style="height: 0px;"> 
+                <div id="progress-bar-filled" style="height: 0%;"></div>
+                </div>
+        </div>
+
+        <div id="timeline" class="space-y-6 flex-grow min-w-0"> 
+            </div>
+    </div>
+
+    <div id="qr-modal">
+        <div id="qr-modal-content">
+            <span id="qr-modal-close">×</span>
+            <img id="qr-modal-image" src="" alt="Vergrößerter QR-Code">
+        </div>
+    </div>
+
+    <script>
+        const eventDate = new Date('2025-06-12T00:00:00'); 
+
+        const events = [ // icon-Eigenschaft aus allen Objekten entfernt
+            {
+                startTime: '07:00', endTime: '08:00', title: 'Jan abholen',
+                address: null, mapsLink: null, ticketInfo: null, bookingCode: null
+            },
+            {
+                startTime: '08:04', endTime: '08:53', title: 'Zugfahrt Lüneburg → Hamburg Hbf',
+                address: null, 
+                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Hamburg+Hbf,+20099+Hamburg',
+                ticketInfo: 'ME RB31 (81664) · Lüneburg (Gleis 6)', 
+                bookingCode: null
+            },
+            {
+                startTime: '09:00', endTime: '09:45', title: 'Frühstück / Brunch',
+                address: null, mapsLink: null, ticketInfo: null, bookingCode: null
+            },
+            {
+                startTime: '11:15', endTime: '12:45', title: 'Trampolinhalle JUMP House',
+                address: 'Kieler Str. 572, 22525 Hamburg',
+                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Kieler+Str.+572,+22525+Hamburg',
+                ticketInfo: 'Slot 11:15 – 12:45', bookingCode: 'Code JH-5731'
+            },
+            {
+                startTime: '14:15', endTime: '15:30', title: 'Rathaus',
+                address: 'Rathausmarkt 1, 20095 Hamburg',
+                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Rathausmarkt+1,+20095+Hamburg',
+                ticketInfo: null, bookingCode: null
+            },
+            { 
+                startTime: '15:45', endTime: '17:00', title: 'Escape Room',
+                address: 'Ferdinandstraße 3, 20095 Hamburg', 
+                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Ferdinandstraße+3,+20095+Hamburg',
+                ticketInfo: 'pause & play Escape Rooms Hamburg-Altstadt · Raum "Spurlos verschwunden"', 
+                bookingCode: 'Buchung TE-517'
+            },
+            { 
+                startTime: '17:15', endTime: '18:45', title: 'BLOCK HOUSE',
+                address: 'Kirchenallee 49-51, 20099 Hamburg',
+                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Kirchenallee+49-51,+20099+Hamburg',
+                ticketInfo: 'Reservierung 17:15 Uhr auf Opitz',
+                bookingCode: null
+            },
+            {
+                startTime: '19:30', endTime: '22:59', title: 'Reeperbahn',
+                address: 'Reeperbahn, Hamburg',
+                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Reeperbahn,+Hamburg',
+                ticketInfo: null, bookingCode: null
+            },
+            { 
+                startTime: '23:00', endTime: null, title: 'Zur Ritze',
+                address: 'Reeperbahn 140, 20359 Hamburg',
+                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Reeperbahn+140,+20359+Hamburg',
+                ticketInfo: 'VIP-Reservierung auf Namen Opitz',
+                bookingCode: '„Show“ ab 23:45'
+            }
+        ];
+
+        const timelineContainer = document.getElementById('timeline');
+        const countdownElement = document.getElementById('countdown');
+        const countdownContainerElement = document.getElementById('countdown-container');
+        const progressBarTrack = document.getElementById('progress-bar-track');
+        const progressBarFilled = document.getElementById('progress-bar-filled');
+        const qrModal = document.getElementById('qr-modal');
+        const qrModalImage = document.getElementById('qr-modal-image');
+        const qrModalClose = document.getElementById('qr-modal-close');
+
+
+        function createEventCard(event, index) {
+            const card = document.createElement('div');
+            card.className = 'event-card p-4 md:p-6';
+            card.id = `event-${index}`;
+
+            let timeDisplay = `${event.startTime}`;
+            if (event.endTime) {
+                timeDisplay += ` – ${event.endTime}`;
+            } else {
+                timeDisplay += ` – Open End`;
+            }
+
+            let directInfoHtml = '';
+            if (event.address) {
+                 directInfoHtml += `<p class="text-sm text-gray-500 mb-1">${event.address}</p>`;
+            }
+
+            let infoTextParts = [];
+            if (event.ticketInfo) infoTextParts.push(event.ticketInfo);
+            if (event.bookingCode) infoTextParts.push(event.bookingCode);
+            
+            if (infoTextParts.length > 0) {
+                directInfoHtml += `<p class="text-sm text-gray-600 mb-3">${infoTextParts.join(' · ')}</p>`;
+            }
+
+            let detailsHtml = '';
+            const hasTicketButton = (event.ticketInfo || event.bookingCode) &&
+                                   event.title !== 'BLOCK HOUSE' &&
+                                   event.title !== 'Zur Ritze';
+
+            if (hasTicketButton) { 
+                 detailsHtml = `
+                <div id="details-${index}" class="details-section mt-3 px-4 text-sm text-center">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Rickrolling_QR_code.png" alt="QR-Code Ticket" class="qr-code-image w-32 h-32 md:w-40 md:h-40 mx-auto mt-2 rounded-lg shadow-md cursor-pointer" data-qr-src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Rickrolling_QR_code.png">
+                </div>`;
+            }
+
+            // const iconHtml = event.icon || ''; // Icon-Logik entfernt
+
+            card.innerHTML = `
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
+                    <h2 class="text-xl md:text-2xl font-semibold mb-1 sm:mb-0 flex items-center">
+                        <span>${event.title}</span>
+                    </h2>
+                    <p class="text-lg font-medium text-gray-700"><span class="event-time-highlight">${timeDisplay}</span></p>
+                </div>
+                ${directInfoHtml}
+                <div class="flex flex-wrap gap-2 mt-2">
+                    ${event.mapsLink ? `<a href="${event.mapsLink}" target="_blank" rel="noopener noreferrer" class="btn btn-map">Maps</a>` : ''}
+                    ${hasTicketButton ? `<button class="btn btn-ticket" data-details-target="details-${index}">Ticket</button>` : ''}
+                </div>
+                ${detailsHtml}
+            `;
+
+            if (hasTicketButton) {
+                const ticketButton = card.querySelector(`[data-details-target="details-${index}"]`);
+                if (ticketButton) {
+                    ticketButton.addEventListener('click', () => {
+                        const detailsSection = document.getElementById(`details-${index}`);
+                        detailsSection.classList.toggle('open');
+                        setTimeout(setupProgressBarLayout, 510); 
+                    });
+                }
+                const qrImage = card.querySelector('.qr-code-image');
+                if (qrImage) {
+                    qrImage.addEventListener('click', (e) => {
+                        const imgSrc = e.target.dataset.qrSrc;
+                        if (imgSrc) {
+                            qrModalImage.src = imgSrc;
+                            qrModal.classList.add('open');
+                        }
+                    });
+                }
+            }
+            return card;
+        }
+
+        if(qrModalClose) {
+            qrModalClose.addEventListener('click', () => {
+                qrModal.classList.remove('open');
+            });
+        }
+        if(qrModal){
+            qrModal.addEventListener('click', (e) => {
+                if (e.target === qrModal) { 
+                    qrModal.classList.remove('open');
+                }
+            });
+        }
+
+
+        function setupProgressBarLayout() {
+            if (!timelineContainer || !progressBarTrack) return;
+            
+            requestAnimationFrame(() => {
+                const cards = timelineContainer.querySelectorAll('.event-card');
+                if (cards.length === 0) {
+                    progressBarTrack.style.height = '0px';
+                    return;
+                }
+
+                const lastCard = cards[cards.length - 1];
+                if (!lastCard || typeof lastCard.offsetTop === 'undefined' || typeof lastCard.offsetHeight === 'undefined') {
+                    return; 
+                }
+                const timelineHeight = lastCard.offsetTop + lastCard.offsetHeight;
+                progressBarTrack.style.height = `${timelineHeight}px`;
+                
+                progressBarTrack.querySelectorAll('.progress-dot').forEach(dot => dot.remove());
+
+                const trackRect = progressBarTrack.getBoundingClientRect();
+
+                cards.forEach((card, index) => {
+                    const dot = document.createElement('div');
+                    dot.className = 'progress-dot';
+                    dot.id = `progress-dot-${index}`;
+                    
+                    const cardRect = card.getBoundingClientRect();
+                    const dotTopInTrack = (cardRect.top + cardRect.height / 2) - trackRect.top;
+                    
+                    dot.style.top = `${dotTopInTrack}px`;
+                    progressBarTrack.appendChild(dot);
+                });
+            });
+        }
+
+        function updateTimelineAndProgress() {
+            const now = new Date(); // Zurück zur aktuellen Zeit
+            let activeEventFound = false;
+
+            if (events.length > 0) {
+                const [firstEventStartHour, firstEventStartMinute] = events[0].startTime.split(':').map(Number);
+                const firstEventDateTime = new Date(eventDate); 
+                firstEventDateTime.setHours(firstEventStartHour, firstEventStartMinute, 0, 0);
+                
+                const diff = firstEventDateTime - now; 
+
+                if (diff > 0 && now < firstEventDateTime) { 
+                    const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const s = Math.floor((diff % (1000 * 60)) / 1000);
+                    countdownElement.textContent = `${d}T ${h}Std ${m}Min ${s}Sek`;
+                    countdownContainerElement.style.display = 'block';
+                } else {
+                    countdownContainerElement.style.display = 'none';
+                }
+            }
+
+            events.forEach((event, index) => {
+                const card = document.getElementById(`event-${index}`);
+                const dot = document.getElementById(`progress-dot-${index}`);
+                if (!card || !dot) return; 
+                const [startHour, startMinute] = event.startTime.split(':').map(Number);
+                const eventStartDate = new Date(eventDate); 
+                eventStartDate.setHours(startHour, startMinute, 0, 0);
+                
+                let eventEndDate;
+                if (event.endTime) {
+                    const [endHour, endMinute] = event.endTime.split(':').map(Number);
+                    eventEndDate = new Date(eventDate); 
+                    eventEndDate.setHours(endHour, endMinute, 0, 0);
+                } else {
+                    eventEndDate = new Date(eventDate); 
+                    eventEndDate.setHours(23, 59, 59, 999);
+                }
+                
+                if (now >= eventStartDate && now <= eventEndDate) {
+                    card.classList.add('active-card');
+                    dot.classList.add('active-dot');
+                    activeEventFound = true;
+                } else {
+                    card.classList.remove('active-card');
+                    dot.classList.remove('active-dot');
+                }
+            });
+
+            if (!activeEventFound && events.length > 0) {
+                const lastEvent = events[events.length - 1];
+                const [lastEventStartHour, lastEventStartMinute] = lastEvent.startTime.split(':').map(Number);
+                const lastEventStartDate = new Date(eventDate); 
+                lastEventStartDate.setHours(lastEventStartHour, lastEventStartMinute, 0, 0);
+                
+                if (lastEvent.endTime === null && now >= lastEventStartDate) {
+                    const lastCard = document.getElementById(`event-${events.length - 1}`);
+                    const lastDot = document.getElementById(`progress-dot-${events.length - 1}`);
+                    if (lastCard) lastCard.classList.add('active-card');
+                    if (lastDot) lastDot.classList.add('active-dot'); 
+                }
+            }
+
+            if (!progressBarFilled || events.length === 0) return;
+            const firstEventTimeParts = events[0].startTime.split(':');
+            const dayOverallStartTime = new Date(eventDate); 
+            dayOverallStartTime.setHours(parseInt(firstEventTimeParts[0]), parseInt(firstEventTimeParts[1]), 0, 0);
+            
+            let dayOverallEndTime = new Date(eventDate); 
+            const lastEventDetails = events[events.length - 1];
+            if (lastEventDetails.endTime) {
+                const lastEventTimeParts = lastEventDetails.endTime.split(':');
+                dayOverallEndTime.setHours(parseInt(lastEventTimeParts[0]), parseInt(lastEventTimeParts[1]), 0, 0);
+            } else {
+                dayOverallEndTime.setHours(23, 59, 59, 999);
+            }
+
+            if (dayOverallEndTime < dayOverallStartTime) {
+                 dayOverallEndTime = new Date(dayOverallStartTime);
+                 dayOverallEndTime.setHours(23,59,59,999);
+            }
+
+            const totalEventWindowDuration = dayOverallEndTime.getTime() - dayOverallStartTime.getTime();
+            
+            if (now < dayOverallStartTime) { 
+                 progressBarFilled.style.height = '0%';
+            } else if (now > dayOverallEndTime) { 
+                 progressBarFilled.style.height = '100%';
+            } else if (totalEventWindowDuration <= 0) {
+                progressBarFilled.style.height = (now >= dayOverallStartTime) ? '100%' : '0%';
+            } else {
+                let elapsedDurationInWindow = now.getTime() - dayOverallStartTime.getTime();
+                elapsedDurationInWindow = Math.max(0, elapsedDurationInWindow);
+                let progressPercentage = (elapsedDurationInWindow / totalEventWindowDuration) * 100;
+                progressPercentage = Math.min(100, Math.max(0, progressPercentage));
+                progressBarFilled.style.height = `${progressPercentage}%`;
+            }
+        }
+
+        events.forEach((event, index) => {
+            const card = createEventCard(event, index);
+            timelineContainer.appendChild(card);
+        });
+        
+        requestAnimationFrame(() => {
+            setupProgressBarLayout(); 
+            updateTimelineAndProgress();
+            // setInterval wieder aktivieren für dynamische Zeit
+            setInterval(() => { 
+                updateTimelineAndProgress();
+            }, 1000);
+        }); 
+
+        window.addEventListener('resize', setupProgressBarLayout); 
+    </script>
+</body>
+</html>
