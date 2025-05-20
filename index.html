@@ -82,9 +82,14 @@
             background-color: #059669;
         }
         #main-title {
-            color: #1a202c; 
             text-align: center;
             margin-bottom: 1.5rem; 
+            font-weight: 700; /* Tailwind: font-bold */
+            /* Farbverlauf für den Text */
+            background-image: linear-gradient(to right, #4f46e5, #db2777); /* Tailwind: indigo-600 to pink-600 */
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
         }
         #countdown-container {
             background-color: #2d3748;
@@ -169,14 +174,11 @@
             background-color: #fee2e2; 
             color: #b91c1c; 
         }
-        /* .event-title-icon CSS entfernt */
     </style>
 </head>
 <body class="p-4 md:p-8">
     
-    <h1 id="main-title" class="text-3xl md:text-4xl font-bold">Ablaufplan JGA Jan</h1>
-
-    <div id="countdown-container" class="text-2xl md:text-3xl font-bold max-w-4xl mx-auto">
+    <h1 id="main-title" class="text-3xl md:text-4xl">Ablaufplan JGA Jan</h1> <div id="countdown-container" class="text-2xl md:text-3xl font-bold max-w-4xl mx-auto">
         Noch <span id="countdown"></span> bis zum Start!
     </div>
 
@@ -201,7 +203,7 @@
     <script>
         const eventDate = new Date('2025-06-12T00:00:00'); 
 
-        const events = [ // icon-Eigenschaft aus allen Objekten entfernt
+        const events = [ 
             {
                 startTime: '07:00', endTime: '08:00', title: 'Jan abholen',
                 address: null, mapsLink: null, ticketInfo: null, bookingCode: null
@@ -299,7 +301,7 @@
             let detailsHtml = '';
             const hasTicketButton = (event.ticketInfo || event.bookingCode) &&
                                    event.title !== 'BLOCK HOUSE' &&
-                                   event.title !== 'Zur Ritze';
+                                   event.title !== 'Zur Ritze'; // Zur Ritze wurde im vorherigen Schritt als NOHO Club benannt
 
             if (hasTicketButton) { 
                  detailsHtml = `
@@ -308,7 +310,6 @@
                 </div>`;
             }
 
-            // const iconHtml = event.icon || ''; // Icon-Logik entfernt
 
             card.innerHTML = `
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
@@ -398,7 +399,7 @@
         }
 
         function updateTimelineAndProgress() {
-            const now = new Date(); // Zurück zur aktuellen Zeit
+            const now = new Date(); 
             let activeEventFound = false;
 
             if (events.length > 0) {
@@ -506,7 +507,6 @@
         requestAnimationFrame(() => {
             setupProgressBarLayout(); 
             updateTimelineAndProgress();
-            // setInterval wieder aktivieren für dynamische Zeit
             setInterval(() => { 
                 updateTimelineAndProgress();
             }, 1000);
