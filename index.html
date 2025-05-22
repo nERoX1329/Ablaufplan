@@ -6,27 +6,54 @@
     <title>Ablaufplan Junggesellenabschied Jan</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
     <style>
+        /* Removed fadeInUp keyframes, will use IntersectionObserver classes */
+        @keyframes pulseDot {
+            0%, 100% { transform: translateY(-50%) scale(1.2); opacity: 1; }
+            50% { transform: translateY(-50%) scale(1.4); opacity: 0.7; }
+        }
+
+        @keyframes countdownTickAnimation {
+            0% { opacity: 0.6; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fallAndFade {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(200px) rotate(720deg); }
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f0f4f8;
             color: #1a202c;
+            overflow-x: hidden; /* Prevent horizontal scroll from confetti */
         }
         .event-card {
             background-color: white;
             border-radius: 12px;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease, border-left-color 0.3s ease;
             position: relative; 
             z-index: 1;  
             padding-left: 1.5rem; 
             border-left-width: 6px; 
             border-left-style: solid;
-            border-left-color: #60a5fa; 
+            border-left-color: #60a5fa; /* Default border color */
+            /* Initial state for IntersectionObserver animation */
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out; /* Removed 0.2s delay on transform here, will add via JS */
+        }
+        .event-card.is-visible {
+            opacity: 1;
+            transform: translateY(0);
         }
         .event-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-5px); /* Keep existing hover transform */
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-left-color: #f87171; /* Red-400 for hover */
         }
         .active-card {
             background-color: #ef4444; 
@@ -37,12 +64,12 @@
         .active-card .text-gray-700, .active-card .text-gray-500, .active-card .text-gray-600 {
             color: #f9fafb;
         }
-        .active-card .btn-map, .active-card .btn-ticket {
+        .active-card .btn-map, .active-card .btn-ticket, .active-card .btn-surprise {
             background-color: #ffffff;
             color: #ef4444;
             border: 1px solid #ef4444;
         }
-        .active-card .btn-map:hover, .active-card .btn-ticket:hover {
+        .active-card .btn-map:hover, .active-card .btn-ticket:hover, .active-card .btn-surprise:hover {
              background-color: #fee2e2;
         }
         .details-section {
@@ -64,8 +91,12 @@
             padding: 0.5rem 1rem;
             border-radius: 8px;
             font-weight: 500;
-            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.1s ease, filter 0.1s ease;
             cursor: pointer;
+        }
+        .btn:active {
+            transform: scale(0.97) translateY(1px);
+            filter: brightness(0.9);
         }
         .btn-map {
             background-color: #3b82f6;
@@ -82,11 +113,11 @@
             background-color: #059669;
         }
         #main-title {
+            font-family: 'Lobster', cursive; 
             text-align: center;
             margin-bottom: 1.5rem; 
-            font-weight: 700; /* Tailwind: font-bold */
-            /* Farbverlauf für den Text */
-            background-image: linear-gradient(to right, #4f46e5, #db2777); /* Tailwind: indigo-600 to pink-600 */
+            font-weight: 700; 
+            background-image: linear-gradient(to right, #4f46e5, #db2777); 
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -100,7 +131,12 @@
             margin-bottom: 2rem;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
         }
-
+        #countdown { /* For countdown tick animation */
+            display: inline-block;
+        }
+        .countdown-tick {
+            animation: countdownTickAnimation 0.3s ease-out;
+        }
         #progress-bar-column {
             padding-right: 10px; 
             position: sticky; 
@@ -108,16 +144,15 @@
             align-self: flex-start;
             z-index: 20; 
         }
-
         #progress-bar-track {
             width: 8px;
-            background-color: #cbd5e1;
+            background-color: #cbd5e1; 
             position: relative;
             border-radius: 4px;
         }
         #progress-bar-filled {
             width: 100%;
-            background-color: #ef4444;
+            background-image: linear-gradient(to bottom, #ef4444, #fca5a5); 
             position: absolute;
             top: 0;
             left: 0;
@@ -128,7 +163,7 @@
             width: 16px;
             height: 16px;
             background-color: white;
-            border: 3px solid #cbd5e1;
+            border: 3px solid #cbd5e1; 
             border-radius: 50%;
             position: absolute;
             left: -4px; 
@@ -137,19 +172,23 @@
             transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
         }
         .progress-dot.active-dot {
-            background-color: #ef4444;
+            background-color: #ef4444; 
             border-color: #ffffff;
-            transform: translateY(-50%) scale(1.2);
+            animation: pulseDot 1.5s infinite ease-in-out;
         }
-
         #qr-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.7); display: flex;
             justify-content: center; align-items: center; z-index: 1000;
             opacity: 0; visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transform: scale(0.95); 
+            transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease; 
         }
-        #qr-modal.open { opacity: 1; visibility: visible; }
+        #qr-modal.open { 
+            opacity: 1; 
+            visibility: visible; 
+            transform: scale(1); 
+        }
         #qr-modal-content {
             background-color: white; padding: 20px; border-radius: 10px;
             position: relative; width: 90%; height: 90%;
@@ -161,7 +200,6 @@
             font-weight: bold; color: #333; cursor: pointer; line-height: 1;
         }
         #qr-modal-close:hover { color: #ef4444; }
-
         .event-time-highlight {
             background-color: #e0e7ff; 
             color: #4338ca; 
@@ -174,11 +212,51 @@
             background-color: #fee2e2; 
             color: #b91c1c; 
         }
+        .btn-surprise {
+            background-color: #db2777; 
+            color: white;
+            font-family: 'Lobster', cursive;
+            font-size: 1.1rem; 
+        }
+        .btn-surprise:hover {
+            background-color: #c5306c; 
+        }
+        .active-card .btn-surprise { 
+            background-color: #ffffff;
+            color: #db2777; 
+            border: 1px solid #db2777;
+        }
+        .active-card .btn-surprise:hover {
+            background-color: #fce7f3; 
+        }
+        .surprise-details {
+            display: none; 
+            font-family: 'Lobster', cursive;
+            color: #db2777; 
+            font-size: 1.25rem; 
+            text-align: center; 
+            margin-top: 0.75rem; 
+            width: 100%; 
+        }
+        .active-card .surprise-details { 
+             color: #fdf2f8; 
+        }
+        .confetti-particle {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            opacity: 0;
+            animation: fallAndFade 2s linear forwards;
+            pointer-events: none;
+            z-index: 2000; /* Ensure confetti is above other elements */
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
     
-    <h1 id="main-title" class="text-3xl md:text-4xl">Ablaufplan JGA Jan</h1> <div id="countdown-container" class="text-2xl md:text-3xl font-bold max-w-4xl mx-auto">
+    <h1 id="main-title" class="text-3xl md:text-4xl">Ablaufplan JGA Jan</h1>
+    <div id="countdown-container" class="text-2xl md:text-3xl font-bold max-w-4xl mx-auto">
         Noch <span id="countdown"></span> bis zum Start!
     </div>
 
@@ -186,11 +264,9 @@
         <div id="progress-bar-column" class="mr-6 md:mr-10 flex-shrink-0"> 
              <div id="progress-bar-track" style="height: 0px;"> 
                 <div id="progress-bar-filled" style="height: 0%;"></div>
-                </div>
+             </div>
         </div>
-
-        <div id="timeline" class="space-y-6 flex-grow min-w-0"> 
-            </div>
+        <div id="timeline" class="space-y-6 flex-grow min-w-0"></div>
     </div>
 
     <div id="qr-modal">
@@ -202,65 +278,16 @@
     
     <script>
         const eventDate = new Date('2025-06-12T00:00:00'); 
-
         const events = [ 
-            {
-                startTime: '07:00', endTime: '08:00', title: 'Jan abholen',
-                address: null, mapsLink: null, ticketInfo: null, bookingCode: null
-            },
-            {
-                startTime: '08:04', endTime: '08:53', title: 'Zugfahrt Lüneburg → Hamburg Hbf',
-                address: null, 
-                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Hamburg+Hbf,+20099+Hamburg',
-                ticketInfo: 'ME RB31 (81664) · Lüneburg (Gleis 6)', 
-                bookingCode: null
-            },
-            {
-                startTime: '09:00', endTime: '09:45', title: 'Frühstück / Brunch',
-                address: null, mapsLink: null, ticketInfo: null, bookingCode: null
-            },
-            {
-                startTime: '11:15', endTime: '12:45', title: 'Trampolinhalle JUMP House',
-                address: 'Kieler Str. 572, 22525 Hamburg',
-                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Kieler+Str.+572,+22525+Hamburg',
-                ticketInfo: 'Slot 11:15 – 12:45',
-                bookingCode: 'Buchungscode JH-5731'
-            },
-            {
-                startTime: '14:15', endTime: '15:30', title: 'Rathaus',
-                address: 'Rathausmarkt 1, 20095 Hamburg',
-                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Rathausmarkt+1,+20095+Hamburg',
-                ticketInfo: null,
-                bookingCode: null
-            },
-            { 
-                startTime: '15:45', endTime: '17:00', title: 'Escape Room',
-                address: 'Ferdinandstraße 3, 20095 Hamburg', 
-                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Ferdinandstraße+3,+20095+Hamburg',
-                ticketInfo: 'pause & play Escape Rooms Hamburg-Altstadt · Raum "Spurlos verschwunden"', 
-                bookingCode: 'Buchungscode TE-517'
-            },
-            { 
-                startTime: '17:15', endTime: '18:45', title: 'BLOCK HOUSE',
-                address: 'Kirchenallee 49-51, 20099 Hamburg',
-                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Kirchenallee+49-51,+20099+Hamburg',
-                ticketInfo: 'Reservierung 17:15 Uhr auf Opitz',
-                bookingCode: null
-            },
-            {
-                startTime: '19:30', endTime: '22:59', title: 'Reeperbahn',
-                address: 'Reeperbahn',
-                mapsLink: 'https://www.google.com/maps/search/?api=1&query=Reeperbahn,+Hamburg',
-                ticketInfo: null, 
-                bookingCode: null
-            },
-            { 
-                startTime: '23:00', endTime: null, title: 'NOHO Club Hamburg',
-                address: 'Nobistor 10, 22767 Hamburg',
-                mapsLink: 'https://www.google.com/maps?q=NOHO+Club',
-                ticketInfo: 'VIP-Reservierung auf Opitz',
-                bookingCode: '„Show“ ab 23:45'
-            }
+            { startTime: '07:00', endTime: '08:00', title: 'Jan abholen', address: null, mapsLink: null, ticketInfo: null, bookingCode: null },
+            { startTime: '08:04', endTime: '08:53', title: 'Zugfahrt Lüneburg → Hamburg Hbf', address: null, mapsLink: 'https://www.google.com/maps/search/?api=1&query=Hamburg+Hbf,+20099+Hamburg', ticketInfo: 'ME RB31 (81664) · Lüneburg (Gleis 6)', bookingCode: null },
+            { startTime: '09:00', endTime: '09:45', title: 'Frühstück / Brunch', address: null, mapsLink: null, ticketInfo: null, bookingCode: null },
+            { startTime: '11:15', endTime: '12:45', title: 'Trampolinhalle JUMP House', address: 'Kieler Str. 572, 22525 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Kieler+Str.+572,+22525+Hamburg', ticketInfo: 'Slot 11:15 – 12:45', bookingCode: 'Buchungscode JH-5731' },
+            { startTime: '14:15', endTime: '15:30', title: 'Rathaus', address: 'Rathausmarkt 1, 20095 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Rathausmarkt+1,+20095+Hamburg', ticketInfo: null, bookingCode: null },
+            { startTime: '15:45', endTime: '17:00', title: 'Escape Room', address: 'Ferdinandstraße 3, 20095 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Ferdinandstraße+3,+20095+Hamburg', ticketInfo: 'pause & play Escape Rooms Hamburg-Altstadt · Raum "Spurlos verschwunden"', bookingCode: 'Buchungscode TE-517' },
+            { startTime: '17:15', endTime: '18:45', title: 'BLOCK HOUSE', address: 'Kirchenallee 49-51, 20099 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Kirchenallee+49-51,+20099+Hamburg', ticketInfo: 'Reservierung 17:15 Uhr auf Opitz', bookingCode: null },
+            { startTime: '19:30', endTime: '22:59', title: 'Reeperbahn', address: 'Reeperbahn', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Reeperbahn,+Hamburg', ticketInfo: null, bookingCode: null },
+            { startTime: '23:00', endTime: null, title: 'NOHO Club Hamburg', address: 'Nobistor 10, 22767 Hamburg', mapsLink: 'https://www.google.com/maps?q=NOHO+Club', ticketInfo: 'VIP-Reservierung auf Opitz', bookingCode: '„Show“ ab 23:45' }
         ];
 
         const timelineContainer = document.getElementById('timeline');
@@ -272,11 +299,11 @@
         const qrModalImage = document.getElementById('qr-modal-image');
         const qrModalClose = document.getElementById('qr-modal-close');
 
-
         function createEventCard(event, index) {
             const card = document.createElement('div');
-            card.className = 'event-card p-4 md:p-6';
+            card.className = 'event-card p-4 md:p-6'; // animationDelay removed from here
             card.id = `event-${index}`;
+            // card.style.animationDelay - removed, IntersectionObserver will handle this
 
             let timeDisplay = `${event.startTime}`;
             if (event.endTime) {
@@ -291,25 +318,37 @@
             }
 
             let infoTextParts = [];
-            if (event.ticketInfo) infoTextParts.push(event.ticketInfo);
-            if (event.bookingCode) infoTextParts.push(event.bookingCode);
+            if (event.ticketInfo) {
+                infoTextParts.push(event.ticketInfo);
+            }
+            if (event.bookingCode && event.title !== 'NOHO Club Hamburg') {
+                infoTextParts.push(event.bookingCode);
+            }
             
             if (infoTextParts.length > 0) {
                 directInfoHtml += `<p class="text-sm text-gray-600 mb-3">${infoTextParts.join(' · ')}</p>`;
             }
 
-            let detailsHtml = '';
-            const hasTicketButton = (event.ticketInfo || event.bookingCode) &&
-                                   event.title !== 'BLOCK HOUSE' &&
-                                   event.title !== 'Zur Ritze'; // Zur Ritze wurde im vorherigen Schritt als NOHO Club benannt
+            let surpriseButtonHtml = '';
+            let surpriseDetailsHtml = '';
+            let isNohoEvent = event.title === 'NOHO Club Hamburg';
 
-            if (hasTicketButton) { 
+            if (isNohoEvent && event.bookingCode) {
+                surpriseButtonHtml = `<button class="btn btn-surprise mt-2 w-full sm:w-auto">Überraschung anzeigen!</button>`;
+                surpriseDetailsHtml = `<div class="surprise-details">${event.bookingCode}</div>`;
+            }
+
+            let detailsHtml = '';
+            const shouldShowTicketQRButton = 
+                isNohoEvent || 
+                ( (event.ticketInfo || (event.bookingCode && !isNohoEvent)) && event.title !== 'BLOCK HOUSE' );
+
+            if (shouldShowTicketQRButton) { 
                  detailsHtml = `
                 <div id="details-${index}" class="details-section mt-3 px-4 text-sm text-center">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Rickrolling_QR_code.png" alt="QR-Code Ticket" class="qr-code-image w-32 h-32 md:w-40 md:h-40 mx-auto mt-2 rounded-lg shadow-md cursor-pointer" data-qr-src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Rickrolling_QR_code.png">
                 </div>`;
             }
-
 
             card.innerHTML = `
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
@@ -321,18 +360,35 @@
                 ${directInfoHtml}
                 <div class="flex flex-wrap gap-2 mt-2">
                     ${event.mapsLink ? `<a href="${event.mapsLink}" target="_blank" rel="noopener noreferrer" class="btn btn-map">Maps</a>` : ''}
-                    ${hasTicketButton ? `<button class="btn btn-ticket" data-details-target="details-${index}">Ticket</button>` : ''}
+                    ${shouldShowTicketQRButton ? `<button class="btn btn-ticket" data-details-target="details-${index}">Ticket</button>` : ''}
                 </div>
+                ${surpriseButtonHtml}
+                ${surpriseDetailsHtml}
                 ${detailsHtml}
             `;
+            
+            if (isNohoEvent && event.bookingCode) {
+                const surpriseButton = card.querySelector('.btn-surprise');
+                const surpriseDetailsElement = card.querySelector('.surprise-details');
+                if (surpriseButton && surpriseDetailsElement) {
+                    surpriseButton.addEventListener('click', () => {
+                        const isHidden = surpriseDetailsElement.style.display === 'none' || surpriseDetailsElement.style.display === '';
+                        surpriseDetailsElement.style.display = isHidden ? 'block' : 'none';
+                        surpriseButton.textContent = isHidden ? 'Überraschung! 🎉' : 'Überraschung ausblenden';
+                        setTimeout(setupProgressBarLayout, 50); 
+                    });
+                }
+            }
 
-            if (hasTicketButton) {
+            if (shouldShowTicketQRButton) {
                 const ticketButton = card.querySelector(`[data-details-target="details-${index}"]`);
                 if (ticketButton) {
                     ticketButton.addEventListener('click', () => {
                         const detailsSection = document.getElementById(`details-${index}`);
-                        detailsSection.classList.toggle('open');
-                        setTimeout(setupProgressBarLayout, 510); 
+                        if (detailsSection) {
+                            detailsSection.classList.toggle('open');
+                            setTimeout(setupProgressBarLayout, 510); 
+                        }
                     });
                 }
                 const qrImage = card.querySelector('.qr-code-image');
@@ -350,71 +406,111 @@
         }
 
         if(qrModalClose) {
-            qrModalClose.addEventListener('click', () => {
-                qrModal.classList.remove('open');
+            qrModalClose.addEventListener('click', () => { qrModal.classList.remove('open'); });
+        }
+        if(qrModal) {
+            qrModal.addEventListener('click', (e) => {
+                if (e.target === qrModal) { qrModal.classList.remove('open'); }
             });
         }
-        if(qrModal){
-            qrModal.addEventListener('click', (e) => {
-                if (e.target === qrModal) { 
-                    qrModal.classList.remove('open');
-                }
-            });
+        
+        function triggerConfetti(count = 30) {
+            const confettiColors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#db2777'];
+            const nohoCard = Array.from(document.querySelectorAll('.event-card h2 span')).find(span => span.textContent === 'NOHO Club Hamburg')?.closest('.event-card');
+            let targetRect;
+            if (nohoCard) {
+                targetRect = nohoCard.getBoundingClientRect();
+            } else { // Fallback if NOHO card not found or not yet rendered
+                targetRect = { top: window.innerHeight / 3, left: window.innerWidth / 2, width: 0, height: 0 };
+            }
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('confetti-particle');
+                particle.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+                
+                // Start confetti around the NOHO card or center of viewport
+                const startX = targetRect.left + (Math.random() * (targetRect.width || window.innerWidth * 0.8)) - (targetRect.width ? 0 : window.innerWidth * 0.4);
+                const startY = targetRect.top + (Math.random() * (targetRect.height || 100)) - 50; // Slightly above the card
+                
+                particle.style.left = `${startX}px`;
+                particle.style.top = `${startY}px`;
+                
+                // Vary animation duration and add slight horizontal movement
+                const duration = Math.random() * 1 + 1.5; // 1.5s to 2.5s
+                particle.style.animationDuration = `${duration}s`;
+                // Add some random horizontal drift
+                particle.style.setProperty('--random-x-end', (Math.random() * 200 - 100) + 'px'); // for @keyframes if adapted
+
+                document.body.appendChild(particle);
+                setTimeout(() => {
+                    particle.remove();
+                }, duration * 1000); // Remove after animation
+            }
         }
 
 
         function setupProgressBarLayout() {
             if (!timelineContainer || !progressBarTrack) return;
-            
             requestAnimationFrame(() => {
                 const cards = timelineContainer.querySelectorAll('.event-card');
-                if (cards.length === 0) {
-                    progressBarTrack.style.height = '0px';
-                    return;
-                }
+                if (cards.length === 0) { progressBarTrack.style.height = '0px'; return; }
+                
+                // Check if all cards are visible (opacity 1) before calculating total height
+                let allCardsRendered = true;
+                cards.forEach(card => {
+                    if (getComputedStyle(card).opacity !== '1') {
+                        allCardsRendered = false;
+                    }
+                });
 
+                // If not all cards are fully visible (due to staggered animation),
+                // it might be better to wait or use a more robust way to get final height.
+                // For now, this will calculate based on currently rendered heights.
                 const lastCard = cards[cards.length - 1];
-                if (!lastCard || typeof lastCard.offsetTop === 'undefined' || typeof lastCard.offsetHeight === 'undefined') {
-                    return; 
-                }
+                if (!lastCard || typeof lastCard.offsetTop === 'undefined' || typeof lastCard.offsetHeight === 'undefined') return;
+                
                 const timelineHeight = lastCard.offsetTop + lastCard.offsetHeight;
                 progressBarTrack.style.height = `${timelineHeight}px`;
                 
                 progressBarTrack.querySelectorAll('.progress-dot').forEach(dot => dot.remove());
-
                 const trackRect = progressBarTrack.getBoundingClientRect();
-
                 cards.forEach((card, index) => {
                     const dot = document.createElement('div');
                     dot.className = 'progress-dot';
                     dot.id = `progress-dot-${index}`;
-                    
                     const cardRect = card.getBoundingClientRect();
                     const dotTopInTrack = (cardRect.top + cardRect.height / 2) - trackRect.top;
-                    
                     dot.style.top = `${dotTopInTrack}px`;
                     progressBarTrack.appendChild(dot);
                 });
             });
         }
 
+        let nohoConfettiTriggered = false; // Flag for NOHO confetti
+
         function updateTimelineAndProgress() {
             const now = new Date(); 
             let activeEventFound = false;
-
             if (events.length > 0) {
                 const [firstEventStartHour, firstEventStartMinute] = events[0].startTime.split(':').map(Number);
                 const firstEventDateTime = new Date(eventDate); 
                 firstEventDateTime.setHours(firstEventStartHour, firstEventStartMinute, 0, 0);
-                
                 const diff = firstEventDateTime - now; 
-
                 if (diff > 0 && now < firstEventDateTime) { 
                     const d = Math.floor(diff / (1000 * 60 * 60 * 24));
                     const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
                     const s = Math.floor((diff % (1000 * 60)) / 1000);
-                    countdownElement.textContent = `${d}T ${h}Std ${m}Min ${s}Sek`;
+                    
+                    const newCountdownText = `${d}T ${h}Std ${m}Min ${s}Sek`;
+                    if (countdownElement.textContent !== newCountdownText) {
+                        countdownElement.textContent = newCountdownText;
+                        countdownElement.classList.add('countdown-tick');
+                        setTimeout(() => {
+                            countdownElement.classList.remove('countdown-tick');
+                        }, 300);
+                    }
                     countdownContainerElement.style.display = 'block';
                 } else {
                     countdownContainerElement.style.display = 'none';
@@ -422,13 +518,13 @@
             }
 
             events.forEach((event, index) => {
-                const card = document.getElementById(`event-${index}`);
+                const cardElement = document.getElementById(`event-${index}`); // Renamed to avoid conflict
                 const dot = document.getElementById(`progress-dot-${index}`);
-                if (!card || !dot) return; 
+                if (!cardElement || !dot) return; 
+                
                 const [startHour, startMinute] = event.startTime.split(':').map(Number);
                 const eventStartDate = new Date(eventDate); 
                 eventStartDate.setHours(startHour, startMinute, 0, 0);
-                
                 let eventEndDate;
                 if (event.endTime) {
                     const [endHour, endMinute] = event.endTime.split(':').map(Number);
@@ -438,13 +534,25 @@
                     eventEndDate = new Date(eventDate); 
                     eventEndDate.setHours(23, 59, 59, 999);
                 }
-                
-                if (now >= eventStartDate && now <= eventEndDate) {
-                    card.classList.add('active-card');
+
+                const isActiveNow = (now >= eventStartDate && now <= eventEndDate);
+
+                if (isActiveNow) {
+                    if (!cardElement.classList.contains('active-card')) {
+                        cardElement.classList.add('active-card');
+                        if (event.title === 'NOHO Club Hamburg' && !nohoConfettiTriggered) {
+                             // Check dataset attribute directly, as cardElement is the NOHO card here
+                            if (!cardElement.dataset.confettiTriggeredForSession) {
+                                triggerConfetti();
+                                cardElement.dataset.confettiTriggeredForSession = 'true'; // Ensures once per session
+                                nohoConfettiTriggered = true; // Global flag to stop further checks this session
+                            }
+                        }
+                    }
                     dot.classList.add('active-dot');
                     activeEventFound = true;
                 } else {
-                    card.classList.remove('active-card');
+                    cardElement.classList.remove('active-card');
                     dot.classList.remove('active-dot');
                 }
             });
@@ -454,11 +562,21 @@
                 const [lastEventStartHour, lastEventStartMinute] = lastEvent.startTime.split(':').map(Number);
                 const lastEventStartDate = new Date(eventDate); 
                 lastEventStartDate.setHours(lastEventStartHour, lastEventStartMinute, 0, 0);
-                
                 if (lastEvent.endTime === null && now >= lastEventStartDate) {
-                    const lastCard = document.getElementById(`event-${events.length - 1}`);
+                    const lastCardElement = document.getElementById(`event-${events.length - 1}`);
                     const lastDot = document.getElementById(`progress-dot-${events.length - 1}`);
-                    if (lastCard) lastCard.classList.add('active-card');
+                    if (lastCardElement) {
+                        if(!lastCardElement.classList.contains('active-card')) {
+                           lastCardElement.classList.add('active-card');
+                            if (lastEvent.title === 'NOHO Club Hamburg' && !nohoConfettiTriggered) {
+                                if (!lastCardElement.dataset.confettiTriggeredForSession) {
+                                    triggerConfetti();
+                                    lastCardElement.dataset.confettiTriggeredForSession = 'true';
+                                    nohoConfettiTriggered = true;
+                                }
+                            }
+                        }
+                    }
                     if (lastDot) lastDot.classList.add('active-dot'); 
                 }
             }
@@ -467,7 +585,6 @@
             const firstEventTimeParts = events[0].startTime.split(':');
             const dayOverallStartTime = new Date(eventDate); 
             dayOverallStartTime.setHours(parseInt(firstEventTimeParts[0]), parseInt(firstEventTimeParts[1]), 0, 0);
-            
             let dayOverallEndTime = new Date(eventDate); 
             const lastEventDetails = events[events.length - 1];
             if (lastEventDetails.endTime) {
@@ -476,14 +593,11 @@
             } else {
                 dayOverallEndTime.setHours(23, 59, 59, 999);
             }
-
             if (dayOverallEndTime < dayOverallStartTime) {
                  dayOverallEndTime = new Date(dayOverallStartTime);
                  dayOverallEndTime.setHours(23,59,59,999);
             }
-
             const totalEventWindowDuration = dayOverallEndTime.getTime() - dayOverallStartTime.getTime();
-            
             if (now < dayOverallStartTime) { 
                  progressBarFilled.style.height = '0%';
             } else if (now > dayOverallEndTime) { 
@@ -499,18 +613,35 @@
             }
         }
 
+        // Initial card creation and IntersectionObserver setup
         events.forEach((event, index) => {
             const card = createEventCard(event, index);
             timelineContainer.appendChild(card);
         });
+
+        const cardsToObserve = document.querySelectorAll('.event-card');
+        const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    // Apply staggered delay for transition
+                    entry.target.style.transitionDelay = `${index * 0.1}s`; 
+                    entry.target.classList.add('is-visible');
+                    obs.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+
+        cardsToObserve.forEach(card => observer.observe(card));
         
-        requestAnimationFrame(() => {
-            setupProgressBarLayout(); 
-            updateTimelineAndProgress();
-            setInterval(() => { 
-                updateTimelineAndProgress();
-            }, 1000);
-        }); 
+        // Delay initial setupProgressBarLayout to allow cards to animate in
+        // and for IntersectionObserver to potentially fire for initially visible cards.
+        setTimeout(() => {
+            requestAnimationFrame(() => {
+                setupProgressBarLayout(); 
+                updateTimelineAndProgress(); 
+                setInterval(updateTimelineAndProgress, 1000); 
+            }); 
+        }, 100); // Reduced delay, IntersectionObserver handles staggered appearance.
 
         window.addEventListener('resize', setupProgressBarLayout); 
     </script>
