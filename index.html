@@ -199,29 +199,6 @@
             background-color: #fee2e2;
             color: #b91c1c;
         }
-        .btn-surprise {
-            background-color: #db2777;
-            color: white;
-            font-family: 'Lobster', cursive;
-            font-size: 1.1rem;
-        }
-        .btn-surprise:hover { background-color: #c5306c; }
-        .active-card .btn-surprise {
-            background-color: #ffffff;
-            color: #db2777;
-            border: 1px solid #db2777;
-        }
-        .active-card .btn-surprise:hover { background-color: #fce7f3; }
-        .surprise-details {
-            display: none;
-            font-family: 'Lobster', cursive;
-            color: #db2777;
-            font-size: 1.25rem;
-            text-align: center;
-            margin-top: 0.75rem;
-            width: 100%;
-        }
-        .active-card .surprise-details { color: #fdf2f8; }
         .confetti-particle {
             position: fixed;
             width: 10px;
@@ -267,34 +244,35 @@
             mapsLink: 'https://www.google.com/maps/search/?api=1&query=east+Hotel+Hamburg',
             bookingCode: 'H-34X-88Z-9K1',
             checkIn: '12.06.2025',
-            checkOut: '15.06.2025'
+            checkOut: '14.06.2025' // Corrected checkout date
         };
 
         const events = [
             // Donnerstag, 12.06.2025
-            { date: '2025-06-12', startTime: '13:00', endTime: '14:00', title: 'Jan abholen & Verabschiedung', address: 'Deine Haustür', mapsLink: null, ticketInfo: null, bookingCode: null, type: 'event' },
-            { date: '2025-06-12', startTime: '14:34', endTime: '15:23', title: 'Zugfahrt Lüneburg → Hamburg Hbf', address: 'Lüneburg (Gleis 4)', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Hamburg+Hbf,+20099+Hamburg', ticketInfo: 'ME RB31 (81672)', bookingCode: null, type: 'event' },
-            { date: '2025-06-12', startTime: '15:30', endTime: '16:00', title: 'Check-in im Hotel', address: hotelInfo.address, mapsLink: hotelInfo.mapsLink, ticketInfo: `Buchungsnr: ${hotelInfo.bookingCode}`, bookingCode: null, type: 'event' },
-            { date: '2025-06-12', startTime: '19:00', endTime: '21:00', title: 'Abendessen in der Bullerei', address: 'Lagerstraße 34b, 20357 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Bullerei+Hamburg', ticketInfo: 'Reservierung 19:00 Uhr auf "Der Bräutigam"', bookingCode: null, type: 'event' },
+            { date: '2025-06-12', startTime: '06:30', endTime: '07:30', title: 'Jan abholen', address: 'Bündweg 21, 21357 Barum', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Buendweg+21+Barum', ticketInfo: null, bookingCode: null, type: 'event' },
+            { date: '2025-06-12', startTime: '10:00', endTime: '11:00', title: 'Check-in im Hotel', address: hotelInfo.address, mapsLink: hotelInfo.mapsLink, ticketInfo: `Buchungsnr: ${hotelInfo.bookingCode}`, bookingCode: null, type: 'event' },
+            { date: '2025-06-12', startTime: '12:15', endTime: '14:45', title: 'Trampolinhalle JUMP House', address: 'Kieler Str. 572, 22525 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Kieler+Str.+572,+22525+Hamburg', ticketInfo: 'Slot 12:15 – 13:45', bookingCode: 'Buchungscode JH-5731', type: 'event' },
+            { date: '2025-06-12', startTime: '19:00', endTime: '21:00', title: 'Abendessen in der Bullerei', address: 'Lagerstraße 34b, 20357 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Bullerei+Hamburg', ticketInfo: 'Reservierung 19:00 Uhr auf "Opitz"', bookingCode: null, type: 'event' },
             
             // Freitag, 13.06.2025
             { date: '2025-06-13', startTime: '10:00', endTime: '11:30', title: 'Katerfrühstück', address: 'Im Hotel oder Umgebung', mapsLink: null, ticketInfo: null, bookingCode: null, type: 'event' },
-            { date: '2025-06-13', startTime: '12:15', endTime: '13:45', title: 'Trampolinhalle JUMP House', address: 'Kieler Str. 572, 22525 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Kieler+Str.+572,+22525+Hamburg', ticketInfo: 'Slot 12:15 – 13:45', bookingCode: 'Buchungscode JH-5731', type: 'event' },
             { date: '2025-06-13', startTime: '16:00', endTime: '17:15', title: 'Escape Room "Spurlos verschwunden"', address: 'Ferdinandstraße 3, 20095 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Ferdinandstraße+3,+20095+Hamburg', ticketInfo: 'pause & play Escape Rooms', bookingCode: 'Buchungscode TE-517', type: 'event' },
-            { date: '2025-06-13', startTime: '19:30', endTime: '22:00', title: 'Dinner im Panthera Rodizio', address: 'Ditmar-Koel-Straße 3, 20459 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Panthera+Rodizio+Hamburg', ticketInfo: 'Reservierung 19:30 Uhr auf "Team Jan"', bookingCode: null, type: 'event' },
-            { date: '2025-06-13', startTime: '22:00', endTime: null, title: 'Kiez-Tour & Reeperbahn', address: 'Reeperbahn', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Reeperbahn,+Hamburg', ticketInfo: 'Freestyle', bookingCode: null, type: 'event' },
+            { date: '2025-06-13', startTime: '18:30', endTime: '21:00', title: 'Dinner im Panthera Rodizio', address: 'Ditmar-Koel-Straße 3, 20459 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Panthera+Rodizio+Hamburg', ticketInfo: 'Reservierung 19:30 Uhr auf "Opitz"', bookingCode: null, type: 'event' },
+            { date: '2025-06-13', startTime: '21:00', endTime: null, title: 'Kiez-Tour & Reeperbahn', address: 'Reeperbahn', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Reeperbahn,+Hamburg', ticketInfo: 'Freestyle', bookingCode: null, type: 'event' },
 
             // Samstag, 14.06.2025
+            { date: '2025-06-14', startTime: '10:00', endTime: '11:00', title: 'Auschecken', address: 'East Hotel Hamburg', mapsLink: hotelInfo.mapsLink, ticketInfo: null, bookingCode: null, type: 'event' },
             { date: '2025-06-14', startTime: '11:00', endTime: '12:30', title: 'Ausflug: Start am Hafen', address: 'Landungsbrücken, Brücke 3', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Landungsbrücken,+Hamburg', ticketInfo: null, bookingCode: null, type: 'event' },
             { date: '2025-06-14', startTime: '12:30', endTime: '16:30', title: 'Hafenrundfahrt XXL & Captains Lunch', address: 'Abfahrt Landungsbrücken', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Landungsbrücken,+Hamburg', ticketInfo: 'Exklusive Charter, inkl. Mittagessen an Bord', bookingCode: 'Charter-ID: HH-HAFEN-JGA', type: 'event' },
-            { date: '2025-06-14', startTime: '18:30', endTime: '20:30', title: 'Steak & Bier im BLOCK HOUSE', address: 'Kirchenallee 49-51, 20099 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Kirchenallee+49-51,+20099+Hamburg', ticketInfo: 'Reservierung 18:30 Uhr auf Opitz', bookingCode: null, type: 'event' },
-            { date: '2025-06-14', startTime: '23:00', endTime: null, title: 'NOHO Club Hamburg', address: 'Nobistor 10, 22767 Hamburg', mapsLink: 'https://www.google.com/maps?q=NOHO+Club', ticketInfo: 'VIP-Reservierung auf Opitz', bookingCode: null, type: 'event' },
-
+            { date: '2025-06-14', startTime: '18:30', endTime: '20:30', title: 'Steak & Bier im BLOCK HOUSE', address: 'Kirchenallee 49-51, 20099 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Kirchenallee+49-51,+20099+Hamburg', ticketInfo: 'Reservierung 18:30 Uhr auf "Opitz"', bookingCode: null, type: 'event' },
+            { date: '2025-06-14', startTime: '21:00', endTime: '22:30', title: 'Party-Limousine nach Uelzen', address: 'Abfahrt vom Block House', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Campingplatz+Uhlenköper-Camp', ticketInfo: 'Gebucht bei "PartyLimo Hamburg"', bookingCode: 'LIMO-HH-7890', type: 'event' },
+            { date: '2025-06-14', startTime: '22:30', endTime: null, title: 'Übernachtung auf dem Campingplatz', address: 'Uhlenköper-Camp, Uelzen', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Campingplatz+Uhlenköper-Camp', ticketInfo: 'Zelte sind schon aufgebaut!', bookingCode: null, type: 'event' },
+            
             // Sonntag, 15.06.2025
-            { date: '2025-06-15', startTime: '11:00', endTime: '13:00', title: 'Brunch & Auschecken', address: 'East Hotel oder Umgebung', mapsLink: hotelInfo.mapsLink, ticketInfo: null, bookingCode: null, type: 'event' },
-            { date: '2025-06-15', startTime: '14:00', endTime: '15:30', title: 'Besuch im Rathaus', address: 'Rathausmarkt 1, 20095 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Rathausmarkt+1,+20095+Hamburg', ticketInfo: 'Einfach mal Kultur.', bookingCode: null, type: 'event' },
-            { date: '2025-06-15', startTime: '20:00', endTime: '22:00', title: 'Highlight: Dinner im "Clouds"', address: 'Reeperbahn 1, 20359 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Clouds+Heavens+Bar+Kitchen+Hamburg', ticketInfo: 'Reservierung Fensterplatz auf "Der Bräutigam"', bookingCode: 'Das große Finale!', type: 'event' },
-            { date: '2025-06-15', startTime: '22:30', endTime: null, title: 'Gemütlicher Ausklang & Abreise', address: 'Hamburg Hbf', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Hamburg+Hbf', ticketInfo: null, bookingCode: null, type: 'event' },
+            { date: '2025-06-15', startTime: '09:00', endTime: '11:00', title: 'Frühstück am See', address: 'Campingplatz Uhlenköper-Camp', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Campingplatz+Uhlenköper-Camp', ticketInfo: null, bookingCode: null, type: 'event' },
+            { date: '2025-06-15', startTime: '11:30', endTime: '12:30', title: 'Rückfahrt nach Hamburg', address: 'Abfahrt vom Campingplatz', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Hamburg+Hbf', ticketInfo: 'Shuttle-Service', bookingCode: null, type: 'event' },
+            { date: '2025-06-15', startTime: '14:00', endTime: '15:30', title: 'Rathaus', address: 'Rathausmarkt 1, 20095 Hamburg', mapsLink: 'https://www.google.com/maps/search/?api=1&query=Rathausmarkt+1,+20095+Hamburg', ticketInfo: 'Schauen wir mal was wird.', bookingCode: null, type: 'event' },
+            { date: '2025-06-15', startTime: '20:00', endTime: '22:00', title: 'Highlight"', address: 'Was genau, erfährst du am Sonntag', mapsLink: null, ticketInfo: null, bookingCode: null, type: 'event' },
         ];
 
         const timelineContainer = document.getElementById('timeline');
@@ -349,22 +327,13 @@
 
             let infoTextParts = [];
             if (event.ticketInfo) infoTextParts.push(event.ticketInfo);
-            if (event.bookingCode && event.title !== 'NOHO Club Hamburg') infoTextParts.push(event.bookingCode);
+            if (event.bookingCode) infoTextParts.push(event.bookingCode);
             if (infoTextParts.length > 0) {
                 directInfoHtml += `<p class="text-sm text-gray-600 mb-3">${infoTextParts.join(' · ')}</p>`;
             }
 
-            let surpriseButtonHtml = '';
-            let surpriseDetailsHtml = '';
-            let isNohoEvent = event.title === 'NOHO Club Hamburg';
-
-            if (isNohoEvent && event.bookingCode) {
-                surpriseButtonHtml = `<button class="btn btn-surprise mt-2 w-full sm:w-auto">Überraschung anzeigen!</button>`;
-                surpriseDetailsHtml = `<div class="surprise-details">${event.bookingCode}</div>`;
-            }
-
             let detailsHtml = '';
-            const shouldShowTicketQRButton = isNohoEvent || (event.ticketInfo && event.title.includes('Zugfahrt')) || (event.bookingCode && !isNohoEvent && !event.title.includes('Dinner'));
+            const shouldShowTicketQRButton = (event.ticketInfo && event.title.includes('Zugfahrt')) || (event.bookingCode && !event.title.includes('Dinner'));
 
             if (shouldShowTicketQRButton) {
                 detailsHtml = `
@@ -383,21 +352,8 @@
                     ${event.mapsLink ? `<a href="${event.mapsLink}" target="_blank" rel="noopener noreferrer" class="btn btn-map">Maps</a>` : ''}
                     ${shouldShowTicketQRButton ? `<button class="btn btn-ticket" data-details-target="details-${index}">Ticket / QR-Code</button>` : ''}
                 </div>
-                ${surpriseButtonHtml}
-                ${surpriseDetailsHtml}
                 ${detailsHtml}
             `;
-
-            if (isNohoEvent && event.bookingCode) {
-                const surpriseButton = card.querySelector('.btn-surprise');
-                const surpriseDetailsElement = card.querySelector('.surprise-details');
-                surpriseButton.addEventListener('click', () => {
-                    const isHidden = surpriseDetailsElement.style.display === 'none' || !surpriseDetailsElement.style.display;
-                    surpriseDetailsElement.style.display = isHidden ? 'block' : 'none';
-                    surpriseButton.textContent = isHidden ? 'Überraschung! 🎉' : 'Überraschung ausblenden';
-                    setTimeout(setupProgressBarLayout, 50);
-                });
-            }
 
             if (shouldShowTicketQRButton) {
                 const ticketButton = card.querySelector(`[data-details-target="details-${index}"]`);
@@ -424,30 +380,6 @@
         if(qrModalClose) qrModalClose.addEventListener('click', () => qrModal.classList.remove('open'));
         if(qrModal) qrModal.addEventListener('click', (e) => { if (e.target === qrModal) qrModal.classList.remove('open'); });
 
-        function triggerConfetti(count = 50) {
-            const confettiColors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#db2777'];
-            const targetCard = document.querySelector('.active-card');
-            let targetRect = targetCard ? targetCard.getBoundingClientRect() : { top: window.innerHeight / 2, left: window.innerWidth / 2, width: 0, height: 0 };
-
-            for (let i = 0; i < count; i++) {
-                const particle = document.createElement('div');
-                particle.classList.add('confetti-particle');
-                particle.style.backgroundColor = confettiColors[Math.floor(Math.random() * confettiColors.length)];
-                
-                const startX = targetRect.left + Math.random() * targetRect.width;
-                const startY = targetRect.top + Math.random() * targetRect.height;
-                
-                particle.style.left = `${startX}px`;
-                particle.style.top = `${startY}px`;
-                
-                const duration = Math.random() * 1.5 + 1.5;
-                particle.style.animationDuration = `${duration}s`;
-                
-                document.body.appendChild(particle);
-                setTimeout(() => particle.remove(), duration * 1000);
-            }
-        }
-
         function setupProgressBarLayout() {
             if (!timelineContainer || !progressBarTrack) return;
             requestAnimationFrame(() => {
@@ -463,7 +395,7 @@
                 progressBarTrack.querySelectorAll('.progress-dot').forEach(dot => dot.remove());
                 const trackRect = progressBarTrack.getBoundingClientRect();
 
-                timelineContainer.querySelectorAll('.event-card').forEach((card, index) => {
+                timelineContainer.querySelectorAll('.event-card').forEach((card) => {
                     const dot = document.createElement('div');
                     dot.className = 'progress-dot';
                     dot.id = `progress-dot-${card.id.split('-')[1]}`;
@@ -543,11 +475,11 @@
             const lastEvent = events[events.length - 1];
             
             const overallStart = new Date(firstEvent.date);
-            overallStart.setHours(...firstEvent.startTime.split(':'), 0, 0);
+            overallStart.setHours(...firstEvent.startTime.split(':').map(Number), 0, 0);
 
             const overallEnd = new Date(lastEvent.date);
             if (lastEvent.endTime) {
-                 overallEnd.setHours(...lastEvent.endTime.split(':'), 0, 0);
+                 overallEnd.setHours(...lastEvent.endTime.split(':').map(Number), 0, 0);
             } else {
                  overallEnd.setHours(23, 59, 59, 999);
             }
